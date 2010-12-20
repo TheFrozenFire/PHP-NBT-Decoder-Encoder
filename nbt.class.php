@@ -11,7 +11,7 @@
  */
 
 extension_loaded("gmp") or die("The NBT class requires the GMP extension.");
-class nbt {
+class NBT {
 	public $root = array();
 	
 	public $verbose = false;
