@@ -137,7 +137,7 @@ class NBT {
 				return $this->writeType($fp, self::TAG_INT, count($value)) && fwrite($fp, call_user_func_array("pack", array_merge(array("c".count($value)), $value)));
 			case self::TAG_STRING: // String
 				$value = utf8_encode($value);
-				return $this->writeType($fp, self::TAG_SHORT, strlen($value)) && fwrite($fp, $value);
+				return $this->writeType($fp, self::TAG_SHORT, strlen($value)) && is_int(fwrite($fp, $value));
 			case self::TAG_LIST: // List
 				if($this->verbose) echo "Writing list of ".count($value["value"])." tags of type {$value["type"]}.".PHP_EOL;
 				if(!($this->writeType($fp, self::TAG_BYTE, $value["type"]) && $this->writeType($fp, self::TAG_INT, count($value["value"])))) return false;
