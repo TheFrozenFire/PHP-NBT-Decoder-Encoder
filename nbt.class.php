@@ -118,23 +118,23 @@ class NBT {
 	protected function writeType($fp, $tagType, $value) {
 		switch($tagType) {
 			case self::TAG_BYTE: // Signed byte (8 bit)
-				return fwrite($fp, pack("c", $value));
+				return is_int(fwrite($fp, pack("c", $value)));
 			case self::TAG_SHORT: // Signed short (16 bit, big endian)
 				if($value < 0) $value += pow(2, 16); // Convert signed short to unsigned short
-				return fwrite($fp, pack("n", $value));
+				return is_int(fwrite($fp, pack("n", $value)));
 			case self::TAG_INT: // Signed integer (32 bit, big endian)
 				if($value < 0) $value += pow(2, 32); // Convert signed int to unsigned int
-				return fwrite($fp, pack("N", $value));
+				return is_int(fwrite($fp, pack("N", $value)));
 			case self::TAG_LONG: // Signed long (64 bit, big endian)
 				$secondHalf = gmp_mod($value, 2147483647);
 				$firstHalf = gmp_sub($value, $secondHalf);
-				return fwrite($fp, pack("N", gmp_intval($firstHalf))) && fwrite($fp, pack("N", gmp_intval($secondHalf)));
+				return is_int(fwrite($fp, pack("N", gmp_intval($firstHalf)))) && is_int(fwrite($fp, pack("N", gmp_intval($secondHalf))));
 			case self::TAG_FLOAT: // Floating point value (32 bit, big endian, IEEE 754-2008)
-				return fwrite($fp, (pack('d', 1) == "\77\360\0\0\0\0\0\0")?pack('f', $value):strrev(pack('f', $value)));
+				return is_int(fwrite($fp, (pack('d', 1) == "\77\360\0\0\0\0\0\0")?pack('f', $value):strrev(pack('f', $value))));
 			case self::TAG_DOUBLE: // Double value (64 bit, big endian, IEEE 754-2008)
-				return fwrite($fp, (pack('d', 1) == "\77\360\0\0\0\0\0\0")?pack('d', $value):strrev(pack('d', $value)));
+				return is_int(fwrite($fp, (pack('d', 1) == "\77\360\0\0\0\0\0\0")?pack('d', $value):strrev(pack('d', $value))));
 			case self::TAG_BYTE_ARRAY: // Byte array
-				return $this->writeType($fp, self::TAG_INT, count($value)) && fwrite($fp, call_user_func_array("pack", array_merge(array("c".count($value)), $value)));
+				return $this->writeType($fp, self::TAG_INT, count($value)) && is_int(fwrite($fp, call_user_func_array("pack", array_merge(array("c".count($value)), $value))));
 			case self::TAG_STRING: // String
 				$value = utf8_encode($value);
 				return $this->writeType($fp, self::TAG_SHORT, strlen($value)) && is_int(fwrite($fp, $value));
@@ -145,7 +145,7 @@ class NBT {
 				return true;
 			case self::TAG_COMPOUND: // Compound
 				foreach($value as $listItem) if(!$this->writeTag($fp, $listItem)) return false;
-				if(!fwrite($fp, "\0")) return false;
+				if(!is_int(fwrite($fp, "\0"))) return false;
 				return true;
 		}
 	}
