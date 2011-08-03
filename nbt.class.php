@@ -30,7 +30,7 @@ class NBT {
 	
 	public function loadFile($filename) {
 		$fp = fopen("compress.zlib://{$filename}", "rb");
-		$this->traverseTag($fp, &$this->root);
+		$this->traverseTag($fp, $this->root);
 		return end($this->root);
 	}
 	
@@ -44,7 +44,7 @@ class NBT {
 		$this->root = array();
 	}
 	
-	protected function traverseTag($fp, $tree) {
+	protected function traverseTag($fp, &$tree) {
 		if(feof($fp)) return false;
 		$tagType = $this->readType($fp, self::TAG_BYTE); // Read type byte.
 		if($tagType == self::TAG_END) {
@@ -110,7 +110,7 @@ class NBT {
 				return $list;
 			case self::TAG_COMPOUND: // Compound
 				$tree = array();
-				while($this->traverseTag($fp, &$tree));
+				while($this->traverseTag($fp, $tree));
 				return $tree;
 		}
 	}
