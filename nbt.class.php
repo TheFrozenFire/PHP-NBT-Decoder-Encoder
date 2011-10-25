@@ -44,7 +44,7 @@ class NBT {
 		$this->root = array();
 	}
 	
-	protected function traverseTag($fp, &$tree) {
+	public function traverseTag($fp, &$tree) {
 		if(feof($fp)) return false;
 		$tagType = $this->readType($fp, self::TAG_BYTE); // Read type byte.
 		if($tagType == self::TAG_END) {
@@ -59,7 +59,7 @@ class NBT {
 		}
 	}
 	
-	protected function writeTag($fp, $tag) {
+	public function writeTag($fp, $tag) {
 		if($this->verbose) {
 			$position = ftell($fp);
 			echo "Writing tag \"{$tag["name"]}\" of type {$tag["type"]} at offset {$position}".PHP_EOL;
@@ -67,7 +67,7 @@ class NBT {
 		return $this->writeType($fp, self::TAG_BYTE, $tag["type"]) && $this->writeType($fp, self::TAG_STRING, $tag["name"]) && $this->writeType($fp, $tag["type"], $tag["value"]);
 	}
 	
-	protected function readType($fp, $tagType) {
+	public function readType($fp, $tagType) {
 		switch($tagType) {
 			case self::TAG_BYTE: // Signed byte (8 bit)
 				list(,$unpacked) = unpack("c", fread($fp, 1));
@@ -118,7 +118,7 @@ class NBT {
 		}
 	}
 	
-	protected function writeType($fp, $tagType, $value) {
+	public function writeType($fp, $tagType, $value) {
 		switch($tagType) {
 			case self::TAG_BYTE: // Signed byte (8 bit)
 				return is_int(fwrite($fp, pack("c", $value)));
