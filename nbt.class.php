@@ -60,7 +60,10 @@ class NBT {
 	}
 	
 	protected function writeTag($fp, $tag) {
-		if($this->verbose) echo "Writing tag \"{$tag["name"]}\" of type {$tag["type"]}".PHP_EOL;
+		if($this->verbose) {
+			$position = ftell($fp);
+			echo "Writing tag \"{$tag["name"]}\" of type {$tag["type"]} at offset {$position}".PHP_EOL;
+		}
 		return $this->writeType($fp, self::TAG_BYTE, $tag["type"]) && $this->writeType($fp, self::TAG_STRING, $tag["name"]) && $this->writeType($fp, $tag["type"], $tag["value"]);
 	}
 	
