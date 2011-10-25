@@ -28,14 +28,14 @@ class NBT {
 	const TAG_LIST = 9;
 	const TAG_COMPOUND = 10;
 	
-	public function loadFile($filename) {
-		$fp = fopen("compress.zlib://{$filename}", "rb");
+	public function loadFile($filename, $wrapper = "compress.zlib://") {
+		if(is_string($wrapper)) $fp = fopen("{$wrapper}{$filename}", "rb"); else $fp = $filename;
 		$this->traverseTag($fp, $this->root);
 		return end($this->root);
 	}
 	
-	public function writeFile($filename) {
-		$fp = fopen("compress.zlib://{$filename}", "wb");
+	public function writeFile($filename, $wrapper = "compress.zlib://") {
+		if(is_string($wrapper)) $fp = fopen("{$wrapper}{$filename}", "wb"); else $fp = $filename;
 		foreach($this->root as $rootTag) if(!$this->writeTag($fp, $rootTag)) return false;
 		return true;
 	}
