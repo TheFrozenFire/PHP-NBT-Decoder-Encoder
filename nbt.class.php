@@ -10,7 +10,11 @@
  *  GMP Extension
  */
 
-extension_loaded("gmp") or die("The NBT class requires the GMP extension.");
+extension_loaded("gmp") or trigger_error (
+	"The NBT class requires the GMP extension for 64-bit number handling. ".
+	"Excecution will continue, but will halt if a 64-bit number is handled.", E_USER_NOTICE
+);
+
 class NBT {
 	public $root = array();
 	
@@ -81,6 +85,10 @@ class NBT {
 				if($unpacked >= pow(2, 31)) $unpacked -= pow(2, 32); // Convert unsigned int to signed int
 				return $unpacked;
 			case self::TAG_LONG: // Signed long (64 bit, big endian)
+				extension_loaded("gmp") or trigger_error (
+					"This file contains a 64-bit number and execution cannot continue. ".
+					"Please install the GMP extension for 64-bit number handling.", E_USER_ERROR
+				);
 				list(,$firstHalf) = unpack("N", fread($fp, 4));
 				list(,$secondHalf) = unpack("N", fread($fp, 4));
 				$value = gmp_add($secondHalf, gmp_mul($firstHalf, "4294967296"));
@@ -129,6 +137,10 @@ class NBT {
 				if($value < 0) $value += pow(2, 32); // Convert signed int to unsigned int
 				return is_int(fwrite($fp, pack("N", $value)));
 			case self::TAG_LONG: // Signed long (64 bit, big endian)
+				extension_loaded("gmp") or trigger_error (
+					"This file contains a 64-bit number and execution cannot continue. ".
+					"Please install the GMP extension for 64-bit number handling.", E_USER_ERROR
+				);
 				$secondHalf = gmp_mod($value, 2147483647);
 				$firstHalf = gmp_sub($value, $secondHalf);
 				return is_int(fwrite($fp, pack("N", gmp_intval($firstHalf)))) && is_int(fwrite($fp, pack("N", gmp_intval($secondHalf))));
