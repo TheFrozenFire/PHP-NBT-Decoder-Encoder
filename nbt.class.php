@@ -33,31 +33,56 @@ class NBT {
 	const TAG_COMPOUND = 10;
 	
 	public function loadFile($filename, $wrapper = "compress.zlib://") {
-		if(is_string($wrapper)) $fp = fopen("{$wrapper}{$filename}", "rb"); else $fp = $filename;
+		if(is_string($wrapper) && is_file($filename)) {
+			if($this->verbose) trigger_error("Loading file \"{$filename}\" with stream wrapper \"{$wrapper}\".", E_USER_NOTICE);
+			$fp = fopen("{$wrapper}{$filename}", "rb");
+		} elseif(is_null($wrapper) && is_resource($fp)) {
+			if($this->verbose) trigger_error("Loading file from existing resource.", E_USER_NOTICE);
+			$fp = $filename;
+		} else {
+			trigger_error("First parameter must be a filename or a resource.", E_USER_WARNING);
+			return false;
+		}
+		if($this->verbose) trigger_error("Traversing first tag in file.", E_USER_NOTICE);
 		$this->traverseTag($fp, $this->root);
+		if($this->verbose) trigger_error("Encountered end tag for first tag; finished.", E_USER_NOTICE);
 		return end($this->root);
 	}
 	
 	public function writeFile($filename, $wrapper = "compress.zlib://") {
-		if(is_string($wrapper)) $fp = fopen("{$wrapper}{$filename}", "wb"); else $fp = $filename;
-		foreach($this->root as $rootTag) if(!$this->writeTag($fp, $rootTag)) return false;
+		if(is_string($wrapper) && is_file($filename)) {
+			if($this->verbose) trigger_error("Writing file \"{$filename}\" with stream wrapper \"{$wrapper}\".", E_USER_NOTICE);
+			$fp = fopen("{$wrapper}{$filename}", "wb");
+		} elseif(is_null($wrapper) && is_resource($fp)) {
+			if($this->verbose) trigger_error("Writing file to existing resource.", E_USER_NOTICE);
+			$fp = $filename;
+		} else {
+			trigger_error("First parameter must be a filename or a resource.", E_USER_WARNING);
+			return false;
+		}
+		if($this->verbose) trigger_error("Writing ".count($this->root)." root tag(s) to file/resource.", E_USER_NOTICE);
+		foreach($this->root as $rootNum => $rootTag) if(!$this->writeTag($fp, $rootTag)) trigger_error("Failed to write root tag #{$rootNum} to file/resource.", E_USER_WARNING);
 		return true;
 	}
 	
 	public function purge() {
+		if($this->verbose) trigger_error("Purging all loaded data", E_USER_ERROR);
 		$this->root = array();
 	}
 	
 	public function traverseTag($fp, &$tree) {
-		if(feof($fp)) return false;
+		if(feof($fp)) {
+			if($this->verbose) trigger_error("Reached end of file/resource.", E_USER_NOTICE);
+			return false;
+		}
 		$tagType = $this->readType($fp, self::TAG_BYTE); // Read type byte.
 		if($tagType == self::TAG_END) {
 			return false;
 		} else {
 			if($this->verbose) $position = ftell($fp);
 			$tagName = $this->readType($fp, self::TAG_STRING);
+			if($this->verbose) trigger_error("Reading tag \"{$tagName}\" at offset {$position}.", E_USER_NOTICE);
 			$tagData = $this->readType($fp, $tagType);
-			if($this->verbose) echo "Reading tag \"{$tagName}\" at offset {$position}".PHP_EOL;
 			$tree[] = array("type"=>$tagType, "name"=>$tagName, "value"=>$tagData);
 			return true;
 		}
@@ -66,7 +91,7 @@ class NBT {
 	public function writeTag($fp, $tag) {
 		if($this->verbose) {
 			$position = ftell($fp);
-			echo "Writing tag \"{$tag["name"]}\" of type {$tag["type"]} at offset {$position}".PHP_EOL;
+			trigger_error("Writing tag \"{$tag["name"]}\" of type {$tag["type"]} at offset {$position}.", E_USER_NOTICE);
 		}
 		return $this->writeType($fp, self::TAG_BYTE, $tag["type"]) && $this->writeType($fp, self::TAG_STRING, $tag["name"]) && $this->writeType($fp, $tag["type"], $tag["value"]);
 	}
@@ -112,7 +137,7 @@ class NBT {
 			case self::TAG_LIST: // List
 				$tagID = $this->readType($fp, self::TAG_BYTE);
 				$listLength = $this->readType($fp, self::TAG_INT);
-				if($this->verbose) echo "Reading in list of {$listLength} tags of type {$tagID}.".PHP_EOL;
+				if($this->verbose) trigger_error("Reading in list of {$listLength} tags of type {$tagID}.", E_USER_NOTICE);
 				$list = array("type"=>$tagID, "value"=>array());
 				for($i = 0; $i < $listLength; $i++) {
 					if(feof($fp)) break;
@@ -154,7 +179,7 @@ class NBT {
 				$value = utf8_encode($value);
 				return $this->writeType($fp, self::TAG_SHORT, strlen($value)) && is_int(fwrite($fp, $value));
 			case self::TAG_LIST: // List
-				if($this->verbose) echo "Writing list of ".count($value["value"])." tags of type {$value["type"]}.".PHP_EOL;
+				if($this->verbose) trigger_error("Writing list of ".count($value["value"])." tags of type {$value["type"]}.", E_USER_NOTICE);
 				if(!($this->writeType($fp, self::TAG_BYTE, $value["type"]) && $this->writeType($fp, self::TAG_INT, count($value["value"])))) return false;
 				foreach($value["value"] as $listItem) if(!$this->writeType($fp, $value["type"], $listItem)) return false;
 				return true;
