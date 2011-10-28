@@ -36,7 +36,7 @@ class NBT {
 		if(is_string($wrapper) && is_file($filename)) {
 			if($this->verbose) trigger_error("Loading file \"{$filename}\" with stream wrapper \"{$wrapper}\".", E_USER_NOTICE);
 			$fp = fopen("{$wrapper}{$filename}", "rb");
-		} elseif(is_null($wrapper) && is_resource($fp)) {
+		} elseif(is_null($wrapper) && is_resource($filename)) {
 			if($this->verbose) trigger_error("Loading file from existing resource.", E_USER_NOTICE);
 			$fp = $filename;
 		} else {
