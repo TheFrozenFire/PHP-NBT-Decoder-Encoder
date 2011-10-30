@@ -50,7 +50,7 @@ class NBT {
 	}
 	
 	public function writeFile($filename, $wrapper = "compress.zlib://") {
-		if(is_string($wrapper) && is_file($filename)) {
+		if(is_string($wrapper)) {
 			if($this->verbose) trigger_error("Writing file \"{$filename}\" with stream wrapper \"{$wrapper}\".", E_USER_NOTICE);
 			$fp = fopen("{$wrapper}{$filename}", "wb");
 		} elseif(is_null($wrapper) && is_resource($fp)) {
