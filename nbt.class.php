@@ -12,7 +12,7 @@
 
 extension_loaded("gmp") or trigger_error (
 	"The NBT class requires the GMP extension for 64-bit number handling. ".
-	"Excecution will continue, but will halt if a 64-bit number is handled.", E_USER_NOTICE
+	"Execution will continue, but will halt if a 64-bit number is handled.", E_USER_NOTICE
 );
 
 class NBT {
