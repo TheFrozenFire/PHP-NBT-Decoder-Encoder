@@ -128,8 +128,7 @@ class NBT {
 				return $value;
 			case self::TAG_BYTE_ARRAY: // Byte array
 				$arrayLength = $this->readType($fp, self::TAG_INT);
-				$array = array();
-				for($i = 0; $i < $arrayLength; $i++) $array[] = $this->readType($fp, self::TAG_BYTE);
+				$array = array_values(unpack("c*", fread($fp, $arrayLength)));
 				return $array;
 			case self::TAG_STRING: // String
 				if(!$stringLength = $this->readType($fp, self::TAG_SHORT)) return "";
