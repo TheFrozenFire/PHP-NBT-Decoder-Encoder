@@ -148,10 +148,9 @@ class NBT {
 				$tree = array();
 				while($this->traverseTag($fp, $tree));
 				return $tree;
-			case self::TAG_INT_ARRAY: // Int array
+			case self::TAG_INT_ARRAY:
 				$arrayLength = $this->readType($fp, self::TAG_INT);
-				$array = array();
-				for($i = 0; $i < $arrayLength; $i++) $array[] = $this->readType($fp, self::TAG_INT);
+				$array = array_values(unpack("N*", fread($fp, $arrayLength * 4)));
 				return $array;
 		}
 	}
@@ -192,10 +191,8 @@ class NBT {
 				foreach($value as $listItem) if(!$this->writeTag($fp, $listItem)) return false;
 				if(!is_int(fwrite($fp, "\0"))) return false;
 				return true;
-			case self::TAG_INT_ARRAY: // Int array
-				if (!($this->writeType($fp, self::TAG_INT, count($value)))) return false;
-				foreach($value as $listitem) if (!$this->writeType($fp, self::TAG_INT, $listitem)) return false;
-				return true;
+			case self::TAG_INT_ARRAY: // Byte array
+				return $this->writeType($fp, self::TAG_INT, count($value)) && is_int(fwrite($fp, call_user_func_array("pack", array_merge(array("N".count($value)), $value))));
 		}
 	}
 }
