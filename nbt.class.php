@@ -31,6 +31,8 @@ class NBT {
 	const TAG_STRING = 8;
 	const TAG_LIST = 9;
 	const TAG_COMPOUND = 10;
+	const TAG_INT_ARRAY = 11;
+	const TAG_LONG_ARRAY = 12;
 	
 	public function loadFile($filename, $wrapper = "compress.zlib://") {
 		if(is_string($wrapper) && is_file($filename)) {
@@ -148,6 +150,16 @@ class NBT {
 				$tree = array();
 				while($this->traverseTag($fp, $tree));
 				return $tree;
+			case self::TAG_INT_ARRAY: // Int array
+				$arrayLength = $this->readType($fp, self::TAG_INT);
+				$array = array();
+				for($i = 0; $i < $arrayLength; $i++) $array[] = $this->readType($fp, self::TAG_INT);
+				return $array;
+			case self::TAG_LONG_ARRAY: // Long array
+				$arrayLength = $this->readType($fp, self::TAG_INT);
+				$array = array();
+				for($i = 0; $i < $arrayLength; $i++) $array[] = $this->readType($fp, self::TAG_LONG);
+				return $array;
 		}
 	}
 	
