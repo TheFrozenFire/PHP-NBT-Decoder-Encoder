@@ -199,6 +199,15 @@ class NBT {
 				foreach($value as $listItem) if(!$this->writeTag($fp, $listItem)) return false;
 				if(!is_int(fwrite($fp, "\0"))) return false;
 				return true;
+			case self::TAG_INT_ARRAY: // Int array
+				return $this->writeType($fp, self::TAG_INT, count($value)) && is_int(fwrite($fp, call_user_func_array("pack", array_merge(array("N".count($value)), $value))));
+			case self::TAG_LONG_ARRAY: // Long array
+				$this->writeType($fp, self::TAG_INT, count($value));
+				foreach($value as $v) {
+					if(!$this->writeType($fp, self::TAG_LONG, $v))
+						return false;
+				}
+				return true;
 		}
 	}
 }
